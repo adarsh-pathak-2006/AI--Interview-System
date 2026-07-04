@@ -1,3 +1,5 @@
 from django.contrib import admin
+from ai.models import *
 
-# Register your models here.
+admin.site.register(QuestionAnswer)
+admin.site.register(Analysis)

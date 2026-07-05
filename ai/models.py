@@ -1,36 +1,47 @@
 from django.db import models
-from administration.models import Resume, Profile
+from administration.models import Resume
 
-class QuestionAnswer(models.Model):
-    resume=models.ForeignKey(Resume, on_delete=models.CASCADE, null=True)
-    question=models.TextField(blank=True)
-    user_answer=models.TextField(blank=True)
-    real_answer=models.TextField(blank=True)
-    points=models.IntegerField(blank=True)
+class Interview(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    )
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='interviews')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.question[:150]
-    
+        return f"Interview for {self.resume.profile.full_name} ({self.status})"
+
+class Question(models.Model):
+    interview = models.ForeignKey(Interview, on_delete=models.CASCADE, related_name='questions')
+    text = models.TextField()
+    order = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"Q{self.order}: {self.text[:50]}"
+
+class Answer(models.Model):
+    question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='answer')
+    user_answer = models.TextField()
+    score = models.IntegerField(null=True, blank=True)
+    ai_feedback = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Answer to {self.question.id}"
 
 class Analysis(models.Model):
-    user=models.ForeignKey(Profile, on_delete=models.CASCADE)
-    QuestionSet=models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE, null=True)    
-    scores=models.JSONField()
-    strengths=models.JSONField()
-    weakness=models.JSONField()
-    missing_skills=models.JSONField()
-    project_analysis=models.JSONField()
-    suggested_roles=models.JSONField()
+    interview = models.OneToOneField(Interview, on_delete=models.CASCADE, related_name='analysis')    
+    scores = models.JSONField()
+    strengths = models.JSONField()
+    weaknesses = models.JSONField()
+    missing_skills = models.JSONField()
+    project_analysis = models.JSONField()
+    suggested_roles = models.JSONField()
+    overall_feedback = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.resume.__str__
-    
-class Interview(models.Model):
-    resume=models.ForeignKey(Resume, on_delete=models.CASCADE)
-    created_at=models.DateTimeField(auto_now_add=True)
-    questionanswerset=models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE)
-    analysis=models.OneToOneField(Analysis, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.questionanswerset.id
-    
+        return f"Analysis for Interview {self.interview.id}"

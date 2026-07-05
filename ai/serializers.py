@@ -1,22 +1,29 @@
 from rest_framework.serializers import ModelSerializer
-from ai.models import *
-from administration.serializers import ProfileSerializer, ResumeSerializer
+from ai.models import Interview, Question, Answer, Analysis
+from administration.serializers import ResumeSerializer
 
-class QuestionAnswerSerializer(ModelSerializer):
+class AnswerSerializer(ModelSerializer):
     class Meta:
-        model=QuestionAnswer
-        fields='__all__'
+        model = Answer
+        fields = '__all__'
+        read_only_fields = ['score', 'ai_feedback']
 
-class AI_RequestSerializer(ModelSerializer):
-    resume=ResumeSerializer()
+class QuestionSerializer(ModelSerializer):
+    answer = AnswerSerializer(read_only=True)
     class Meta:
-        model=QuestionAnswer
-        fields=['resume']
+        model = Question
+        fields = '__all__'
 
 class AnalysisSerializer(ModelSerializer):
-    user=ProfileSerializer(read_only=True)
-    resume=ResumeSerializer(read_only=True)
     class Meta:
-        model=Analysis
-        fields='__all__'
+        model = Analysis
+        fields = '__all__'
 
+class InterviewSerializer(ModelSerializer):
+    questions = QuestionSerializer(read_only=True, many=True)
+    analysis = AnalysisSerializer(read_only=True)
+    
+    class Meta:
+        model = Interview
+        fields = '__all__'
+        read_only_fields = ['status']

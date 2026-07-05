@@ -8,6 +8,14 @@ from ai.models import Interview, Question, Answer, Analysis
 from ai.serializers import InterviewSerializer, QuestionSerializer, AnswerSerializer, AnalysisSerializer
 from ai.services import generate_interview_questions, evaluate_answer, generate_final_analysis
 
+class RetrieveInterviewAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, interview_id):
+        interview = get_object_or_404(Interview, id=interview_id, resume__profile__user=request.user)
+        serializer = InterviewSerializer(interview)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class StartInterviewAPI(APIView):
     permission_classes = [IsAuthenticated]
 

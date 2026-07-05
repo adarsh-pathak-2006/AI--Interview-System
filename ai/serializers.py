@@ -2,11 +2,16 @@ from rest_framework.serializers import ModelSerializer
 from ai.models import *
 from administration.serializers import ProfileSerializer, ResumeSerializer
 
-
 class QuestionAnswerSerializer(ModelSerializer):
     class Meta:
         model=QuestionAnswer
         fields='__all__'
+
+class AI_RequestSerializer(ModelSerializer):
+    resume=ResumeSerializer()
+    class Meta:
+        model=QuestionAnswer
+        fields=['resume']
 
 class AnalysisSerializer(ModelSerializer):
     user=ProfileSerializer(read_only=True)
@@ -14,3 +19,4 @@ class AnalysisSerializer(ModelSerializer):
     class Meta:
         model=Analysis
         fields='__all__'
+

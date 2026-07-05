@@ -27,3 +27,24 @@ class ResumeAPIDetail(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         profile_object=Profile.objects.filter(user=self.request.user)
         return Resume.objects.filter(profile=profile_object)
+
+class ProjectAPI(ListCreateAPIView):
+    serializer_class=ProjectSerializer
+
+    def get_queryset(self):
+        profile_data=Profile.objects.filter(user=self.request.user)
+        resume_data=Resume.objects.filter(profile=profile_data)
+        return Project.objects.filter(corresponding_resume=resume_data)
+    
+    def perform_create(self, serializer):
+        profile_data=Profile.objects.filter(user=self.request.user)
+        resume_data=Resume.objects.filter(profile=profile_data)
+        serializer.save(corresponding_resume=resume_data)
+
+class ProjectAPIDetail(RetrieveUpdateDestroyAPIView):
+    serializer_class=ProjectSerializer
+
+    def get_queryset(self):
+        profile_data=Profile.objects.filter(user=self.request.user)
+        resume_data=Resume.objects.filter(profile=profile_data)
+        return Project.objects.filter(corresponding_resume=resume_data)
